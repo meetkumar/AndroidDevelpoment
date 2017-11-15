@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "998902691596",
+    "firebase_url": "https://helix-1510614468401.firebaseio.com",
+    "project_id": "helix-1510614468401",
+    "storage_bucket": "helix-1510614468401.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:998902691596:android:e86c37b5273c9752",
+        "android_client_info": {
+          "package_name": "com.example.meetkumarpatel.helix"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "998902691596-8trl8moqe6ch820i834l0l2i4afil21d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChlgCeWHOxi5XVNztWujeFhOcavrrRhHs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

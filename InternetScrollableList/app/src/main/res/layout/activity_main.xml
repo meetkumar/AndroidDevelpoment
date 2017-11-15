@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="16dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
+    
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        android:id="@+id/et_search_box"
+        android:textSize="22sp"
+        android:hint="Enter query and hit search"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_url_display"
+        android:textSize="22sp"
+        android:layout_marginTop="8dp"
+        android:text="Search URL will appear here after search"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:id="@+id/tv_github_search_result_json"
+            android:text="Make a search"/>
+    </ScrollView>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:id="@+id/tv_error_message_display"
+            android:padding="16dp"
+            android:text="@string/error_message"
+            android:visibility="invisible"/>
+        <ProgressBar
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:id="@+id/pb_loading_indicator"
+            android:layout_gravity="center"
+            android:visibility="invisible"/>
+    </FrameLayout>
+</LinearLayout>
