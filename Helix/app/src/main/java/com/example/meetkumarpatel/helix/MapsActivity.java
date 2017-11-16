@@ -1,19 +1,25 @@
 package com.example.meetkumarpatel.helix;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ListActivity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 
-import com.google.android.gms.location.LocationListener;
+import android.location.LocationListener;
 
 import android.location.LocationManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -50,6 +56,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationRequest locationRequest;
     private Location lastLocation;
     private Marker currentLocationMarker;
+    private LocationListener mLocationListener;
     public static final int PERMISSION_REQUEST_LOCATION_CODE = 99;
     public int PROXIMITY_RADIUS = 10000;
     double latitude, longitude;
@@ -69,8 +76,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 100, new android.location.LocationListener() {
+        if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 100, new android.location.LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 //get latitude
@@ -87,6 +94,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     address += addressList.get(0).getCountryName();
                     mMap.addMarker(new MarkerOptions().position(latLng).title(address));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,15.2f));
+                    String url = getUrl(latitude,longitude,"almond");
+                    Object[] dataTransfer = new Object[2];
+                    dataTransfer[0] = mMap;
+                    dataTransfer[1] = url;
+                    GetNearbyDeals getNearbyDeals = new GetNearbyDeals();
+                    getNearbyDeals.execute(dataTransfer);
                     sendNotification();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -99,7 +112,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
             @Override
-            public void onProviderEnabled(String s) {
+            public void onProviderEnabled(final String s) {
 
             }
 
@@ -109,8 +122,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
         }
-        else if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 100, new android.location.LocationListener() {
+        else if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 100, new android.location.LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
                     //get latitude
@@ -146,12 +159,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 @Override
                 public void onProviderDisabled(String s) {
-
+                    Message msg = handler.obtainMessage();
+                    msg.arg1 =1;
+                    handler.sendMessage(msg);
                 }
+
+                private final Handler handler = new Handler() {
+                    public void handleMessage(Message msg) {
+                        if (msg.arg1 == 1) {
+                            if (!isFinishing()) { // Without this in certain cases application will show ANR
+                                AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+                                builder.setMessage("Your GPS is disabled! Would you like to enable it?").setCancelable(false).setPositiveButton("Enable GPS", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        Intent gpsOptionsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                        startActivity(gpsOptionsIntent);
+                                    }
+                                });
+                                builder.setNegativeButton("Do nothing", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+                                AlertDialog alert = builder.create();
+                                alert.show();
+                            }
+                        }
+                    }
+                };
             });
         }
     }
-
 
     /**
      * Manipulates the map once available.
@@ -172,10 +209,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void sendNotification(){
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.notification)
-                        .setWhen(100)
-                        .setOngoing(false)
+                        .setSmallIcon(R.drawable.ic_launcher_background)
+                        .setWhen(System.currentTimeMillis())
                         .setContentTitle("Location")
+                        .setAutoCancel(true)
                         .setContentText(latitude+" "+longitude);
         Intent notificationIntent = new Intent(this, MapsActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this,0,notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT);
@@ -184,13 +221,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mNotificationManager.notify(001,mBuilder.build());
     }
 
-    public String getUrl(double latitude, double longitude, String nearbyPlace){
-        StringBuilder googlePlace = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        googlePlace.append("location"+latitude+","+longitude);
-        googlePlace.append("&radius="+PROXIMITY_RADIUS);
-        googlePlace.append("&type="+nearbyPlace);
-        googlePlace.append("&sensor=true");
-        googlePlace.append("&key="+"AIzaSyAiF3f3ozpfuagGg0UOp8olCxMr7jzh68s");
+    public String getUrl(double latitude, double longitude, String query){
+        StringBuilder googlePlace = new StringBuilder("http://api.walmartlabs.com/v1/search?apiKey=w6m52dk9j55kr92ubzh47hve");
+        googlePlace.append("&query=milk");
+        googlePlace.append("&format="+"json");
+        googlePlace.append("&facet=on");
+        googlePlace.append("&facet.filter="+query);
 
         return googlePlace.toString();
     }

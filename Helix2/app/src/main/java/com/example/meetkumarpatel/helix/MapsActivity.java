@@ -87,6 +87,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         address += addressList.get(0).getCountryName();
                         mMap.addMarker(new MarkerOptions().position(latLng).title(address));
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,15.2f));
+                        String url = getUrl(latitude,longitude,"almond");
+                        Object[] dataTransfer = new Object[2];
+                        dataTransfer[0] = mMap;
+                        dataTransfer[1] = url;
+                        GetNearbyDeals getNearbyDeals = new GetNearbyDeals();
+                        getNearbyDeals.execute(dataTransfer);
                         sendNotification();
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -184,13 +190,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mNotificationManager.notify(001,mBuilder.build());
     }
 
-    public String getUrl(double latitude, double longitude, String nearbyPlace){
-        StringBuilder googlePlace = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        googlePlace.append("location"+latitude+","+longitude);
-        googlePlace.append("&radius="+PROXIMITY_RADIUS);
-        googlePlace.append("&type="+nearbyPlace);
-        googlePlace.append("&sensor=true");
-        googlePlace.append("&key="+"AIzaSyAiF3f3ozpfuagGg0UOp8olCxMr7jzh68s");
+    public String getUrl(double latitude, double longitude, String query){
+        StringBuilder googlePlace = new StringBuilder("http://api.walmartlabs.com/v1/search?apiKey=w6m52dk9j55kr92ubzh47hve");
+        googlePlace.append("&query=milk");
+        googlePlace.append("&format="+"json");
+        googlePlace.append("&facet=on");
+        googlePlace.append("&facet.filter="+query);
 
         return googlePlace.toString();
     }
